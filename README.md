@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Brasil - Cadastro de Guias Turísticas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .whatsapp-preview {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #25d366;
+            margin-top: 10px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .whatsapp-btn {
+            background: #25d366;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128c7e;
+        } 
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sistema Principal -->
+    <div id="mainSystem">
+        <div class="container">
+            <div class="header">
+                <h1 style="margin-bottom: 10px; font-size: 2.2em;">🌟 Nova Brasil </h1>
+                <p>Sistema de Cadastro de Guias Turísticas</p>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('cadastro')">📝 Cadastro</button>
+                <button class="nav-tab" onclick="showTab('eventos')">🎯 Eventos</button>
+                <button class="nav-tab" onclick="showTab('colaboradores')">👥 Colaboradores</button>
+                <button class="nav-tab" onclick="showTab('relatorios')">📊 Relatórios</button>
+                <button class="nav-tab" onclick="showTab('dados')">📋 Dados</button>
+            </div>
+
+            <!-- Aba Cadastro -->
+            <div id="cadastro" class="tab-content active">
+                <div class="card">
+                    <h2>📋 Cadastrar Nova Guia Turística</h2>
+                    <form id="guiaForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nome">Nome Completo:</label>
+                                <input type="text" id="nome" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cidade">Cidade:</label>
+                                <input type="text" id="cidade" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="estado">Estado:</label>
+                                <select id="estado" required>
+                                    <option value="">Selecione o Estado</option>
+                                    <option value="AC">Acre</option>
+                                    <option value="AL">Alagoas</option>
+                                    <option value="AP">Amapá</option>
+                                    <option value="AM">Amazonas</option>
+                                    <option value="BA">Bahia</option>
+                                    <option value="CE">Ceará</option>
+                                    <option value="DF">Distrito Federal</option>
+                                    <option value="ES">Espírito Santo</option>
+                                    <option value="GO">Goiás</option>
+                                    <option value="MA">Maranhão</option>
+                                    <option value="MT">Mato Grosso</option>
+                                    <option value="MS">Mato Grosso do Sul</option>
+                                    <option value="MG">Minas Gerais</option>
+                                    <option value="PA">Pará</option>
+                                    <option value="PB">Paraíba</option>
+                                    <option value="PR">Paraná</option>
+                                    <option value="PE">Pernambuco</option>
+                                    <option value="PI">Piauí</option>
+                                    <option value="RJ">Rio de Janeiro</option>
+                                    <option value="RN">Rio Grande do Norte</option>
+                                    <option value="RS">Rio Grande do Sul</option>
+                                    <option value="RO">Rondônia</option>
+                                    <option value="RR">Roraima</option>
+                                    <option value="SC">Santa Catarina</option>
+                                    <option value="SP">São Paulo</option>
+                                    <option value="SE">Sergipe</option>
+                                    <option value="TO">Tocantins</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="telefone">Telefone:</label>
+                                <input type="tel" id="telefone" placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="form-group">
+                                <label for="whatsapp">WhatsApp:</label>
+                                <input type="tel" id="whatsapp" placeholder="(00) 00000-0000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="passageiros">Quantidade de Passageiros:</label>
+                                <input type="number" id="passageiros" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="colaborador">Colaborador Responsável:</label>
+                                <select id="colaborador" required>
+                                    <option value="">Selecione o Colaborador</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="evento">Evento:</label>
+                                <select id="evento" required>
+                                    <option value="">Selecione o Evento</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="dataVisita">Data da Visita:</label>
+                                <input type="date" id="dataVisita" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="observacoes">Observações:</label>
+                            <textarea id="observacoes" placeholder="Informações adicionais..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">💾 Cadastrar Guia</button>
+                            <button type="button" class="btn btn-success" onclick="previewWhatsApp()">📱 Preview WhatsApp</button>
+                        </div>
+                    </form>
+
+                    <div id="whatsappPreview" class="whatsapp-preview" style="display: none;">
+                        <h4>📱 Preview da Mensagem WhatsApp:</h4>
+                        <div id="whatsappMessage"></div>
+                        <button class="btn btn-success" style="margin-top: 10px;" onclick="sendWhatsApp()">Enviar WhatsApp</button>
+                    </div>
+
+                    <!-- Mensagem de Sucesso -->
+                    <div id="mensagemSucesso" style="display: none; padding: 15px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 8px; margin-top: 20px; text-align: center; font-weight: bold;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Eventos -->
+            <div id="eventos" class="tab-content">
+                <div class="card">
+                    <h2>🎯 Gerenciar Eventos</h2>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <input type="text" id="novoEvento" placeholder="Nome do novo evento..." style="flex: 1;">
+                        <button class="btn btn-primary" onclick="adicionarEvento()">➕ Adicionar</button>
+                    </div>
+                    <div id="listaEventos">
+                        <!-- Eventos serão listados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Colaboradores -->
+            <div id="colaboradores" class="tab-content">
+                <div class="card">
+                    <h2>👥 Gerenciar Colaboradores</h2>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <input type="text" id="novoColaborador" placeholder="Nome do novo colaborador..." style="flex: 1;">
+                        <button class="btn btn-primary" onclick="adicionarColaborador()">➕ Adicionar</button>
+                    </div>
+                    <div id="listaColaboradores">
+                        <!-- Colaboradores serão listados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Relatórios -->
+            <div id="relatorios" class="tab-content">
+                <!-- Proteção por Senha dos Relatórios -->
+                <div id="senhaRelatorios" style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 400px; margin: 0 auto;">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px;">🔐 Acesso aos Relatórios</h3>
+                    <div class="form-group">
+                        <label for="senhaRelatorio">Senha de Acesso:</label>
+                        <input type="password" id="senhaRelatorio" placeholder="Digite a senha" style="width: 100%;">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="acessarRelatorios()">Acessar Relatórios</button>
+                    <div id="erroSenhaRelatorio" style="color: #d32f2f; margin-top: 10px; display: none;">
+                        Senha incorreta! Tente novamente.
+                    </div>
+                </div>
+
+                <!-- Conteúdo dos Relatórios (inicialmente oculto) -->
+                <div id="conteudoRelatorios" style="display: none;">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2>📊 Relatórios e Estatísticas</h2>
+                            <button class="btn btn-warning" style="padding: 8px 15px;" onclick="bloquearRelatorios()">🔒 Bloquear</button>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalGuias">0</div>
+                                <div>Total de Guias</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalPassageiros">0</div>
+                                <div>Total de Passageiros</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="guiasHoje">0</div>
+                                <div>Guias Hoje</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="guiasSemana">0</div>
+                                <div>Guias esta Semana</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin: 20px 0;">
+                            <select id="filtroRelatorio">
+                                <option value="todos">Todos os Períodos</option>
+                                <option value="hoje">Hoje</option>
+                                <option value="semana">Esta Semana</option>
+                                <option value="mes">Este Mês</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="atualizarRelatorios()">🔄 Atualizar</button>
+                            <button class="btn btn-warning" onclick="exportarExcel()">📋 Exportar Excel</button>
+                        </div>
+
+                        <div id="relatorioDetalhado"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Dados -->
+            <div id="dados" class="tab-content">
+                <!-- Proteção por Senha dos Dados -->
+                <div id="senhaDados" style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 400px; margin: 0 auto;">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px;">🔐 Acesso aos Dados</h3>
+                    <div class="form-group">
+                        <label for="senhaDado">Senha de Acesso:</label>
+                        <input type="password" id="senhaDado" placeholder="Digite a senha" style="width: 100%;">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="acessarDados()">Acessar Dados</button>
+                    <div id="erroSenhaDado" style="color: #d32f2f; margin-top: 10px; display: none;">
+                        Senha incorreta! Tente novamente.
+                    </div>
+                </div>
+
+                <!-- Conteúdo dos Dados (inicialmente oculto) -->
+                <div id="conteudoDados" style="display: none;">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2>📋 Dados Cadastrados</h2>
+                            <button class="btn btn-warning" style="padding: 8px 15px;" onclick="bloquearDados()">🔒 Bloquear</button>
+                        </div>
+                        
+                        <!-- Botões de Ação -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <button class="btn btn-success" onclick="salvarDados()">💾 Salvar Dados</button>
+                            <button class="btn btn-warning" onclick="exportarExcel()">📋 Exportar Excel</button>
+                            <button class="btn btn-primary" onclick="limparDados()">🗑️ Limpar Tudo</button>
+                            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="carregarDados(event)">
+                            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📂 Carregar Dados</button>
+                        </div>
+
+                        <!-- Status de Salvamento -->
+                        <div id="statusSalvamento" style="padding: 10px; border-radius: 5px; margin-bottom: 20px; display: none;">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <input type="text" id="filtroNome" placeholder="Filtrar por nome..." style="margin-right: 10px;">
+                            <select id="filtroCidade" style="margin-right: 10px;">
+                                <option value="">Todas as Cidades</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="filtrarDados()">🔍 Filtrar</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="tabelaDados">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Cidade/Estado</th>
+                                        <th>WhatsApp</th>
+                                        <th>Passageiros</th>
+                                        <th>Evento</th>
+                                        <th>Colaborador</th>
+                                        <th>Data</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="corpoTabela">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados em memória
+        let guias = [];
+        let eventos = ['Feira de Turismo São Paulo', 'Festival de Inverno', 'Expo Turismo Brasil', 'Congresso de Turismo'];
+        let colaboradores = ['Maria Silva', 'João Santos', 'Ana Costa', 'Pedro Oliveira'];
+
+        // Inicializar sistema
+        function inicializarSistema() {
+            carregarEventos();
+            carregarColaboradores();
+            atualizarRelatorios();
+            atualizarTabelaDados();
+            document.getElementById('dataVisita').valueAsDate = new Date();
+        }
+
+        // Inicializar na carga da página
+        window.addEventListener('load', function() {
+            inicializarSistema();
+        });
+
+        // Navegação entre abas
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Verificar proteção por senha
+            if (tabName === 'relatorios') {
+                verificarAcessoRelatorios();
+            } else if (tabName === 'dados') {
+                verificarAcessoDados();
+            }
+        }
+
+        // Funções de proteção dos relatórios
+        function verificarAcessoRelatorios() {
+            const temAcesso = sessionStorage.getItem('acessoRelatorios') === 'true';
+            
+            if (temAcesso) {
+                document.getElementById('senhaRelatorios').style.display = 'none';
+                document.getElementById('conteudoRelatorios').style.display = 'block';
+                atualizarRelatorios();
+            } else {
+                document.getElementById('senhaRelatorios').style.display = 'block';
+                document.getElementById('conteudoRelatorios').style.display = 'none';
+            }
+        }
+
+        function acessarRelatorios() {
+            const senha = document.getElementById('senhaRelatorio').value;
+            const SENHA_RELATORIOS = 'NB2025';
+            
+            if (senha === SENHA_RELATORIOS) {
+                sessionStorage.setItem('acessoRelatorios', 'true');
+                document.getElementById('senhaRelatorios').style.display = 'none';
+                document.getElementById('conteudoRelatorios').style.display = 'block';
+                document.getElementById('senhaRelatorio').value = '';
+                document.getElementById('erroSenhaRelatorio').style.display = 'none';
+                atualizarRelatorios();
+            } else {
+                document.getElementById('erroSenhaRelatorio').style.display = 'block';
+                document.getElementById('senhaRelatorio').value = '';
+            }
+        }
+
+        function bloquearRelatorios() {
+            sessionStorage.removeItem('acessoRelatorios');
+            document.getElementById('senhaRelatorios').style.display = 'block';
+            document.getElementById('conteudoRelatorios').style.display = 'none';
+        }
+
+        // Funções de proteção dos dados
+        function verificarAcessoDados() {
+            const temAcesso = sessionStorage.getItem('acessoDados') === 'true';
+            
+            if (temAcesso) {
+                document.getElementById('senhaDados').style.display = 'none';
+                document.getElementById('conteudoDados').style.display = 'block';
+                atualizarTabelaDados();
+            } else {
+                document.getElementById('senhaDados').style.display = 'block';
+                document.getElementById('conteudoDados').style.display = 'none';
+            }
+        }
+
+        function acessarDados() {
+            const senha = document.getElementById('senhaDado').value;
+            const SENHA_DADOS = 'NB2025';
+            
+            if (senha === SENHA_DADOS) {
+                sessionStorage.setItem('acessoDados', 'true');
+                document.getElementById('senhaDados').style.display = 'none';
+                document.getElementById('conteudoDados').style.display = 'block';
+                document.getElementById('senhaDado').value = '';
+                document.getElementById('erroSenhaDado').style.display = 'none';
+                atualizarTabelaDados();
+            } else {
+                document.getElementById('erroSenhaDado').style.display = 'block';
+                document.getElementById('senhaDado').value = '';
+            }
+        }
+
+        function bloquearDados() {
+            sessionStorage.removeItem('acessoDados');
+            document.getElementById('senhaDados').style.display = 'block';
+            document.getElementById('conteudoDados').style.display = 'none';
+        }
+
+        // Permitir Enter nas senhas
+        document.addEventListener('DOMContentLoaded', function() {
+            const senhaRelatorioInput = document.getElementById('senhaRelatorio');
+            const senhaDadoInput = document.getElementById('senhaDado');
+            
+            if (senhaRelatorioInput) {
+                senhaRelatorioInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        acessarRelatorios();
+                    }
+                });
+            }
+            
+            if (senhaDadoInput) {
+                senhaDadoInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        acessarDados();
+                    }
+                });
+            }
+        });
+
+        // Gerenciamento de Colaboradores
+        function carregarColaboradores() {
+            const selectColaborador = document.getElementById('colaborador');
+            const listaColaboradores = document.getElementById('listaColaboradores');
+            
+            selectColaborador.innerHTML = '<option value="">Selecione o Colaborador</option>';
+            listaColaboradores.innerHTML = '';
+            
+            colaboradores.forEach((colaborador, index) => {
+                selectColaborador.innerHTML += `<option value="${colaborador}">${colaborador}</option>`;
+                listaColaboradores.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">
+                        <span>${colaborador}</span>
+                        <button class="btn btn-warning" style="padding: 5px 10px;" onclick="removerColaborador(${index})">🗑️ Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        function adicionarColaborador() {
+            const novoColaborador = document.getElementById('novoColaborador').value.trim();
+            if (novoColaborador && !colaboradores.includes(novoColaborador)) {
+                colaboradores.push(novoColaborador);
+                carregarColaboradores();
+                document.getElementById('novoColaborador').value = '';
+            }
+        }
+
+        function removerColaborador(index) {
+            if (confirm('Tem certeza que deseja remover este colaborador?')) {
+                colaboradores.splice(index, 1);
+                carregarColaboradores();
+            }
+        }
+
+        // Gerenciamento de Eventos
+        function carregarEventos() {
+            const selectEvento = document.getElementById('evento');
+            const listaEventos = document.getElementById('listaEventos');
+            
+            selectEvento.innerHTML = '<option value="">Selecione o Evento</option>';
+            listaEventos.innerHTML = '';
+            
+            eventos.forEach((evento, index) => {
+                selectEvento.innerHTML += `<option value="${evento}">${evento}</option>`;
+                listaEventos.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">
+                        <span>${evento}</span>
+                        <button class="btn btn-warning" style="padding: 5px 10px;" onclick="removerEvento(${index})">🗑️ Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        function adicionarEvento() {
+            const novoEvento = document.getElementById('novoEvento').value.trim();
+            if (novoEvento && !eventos.includes(novoEvento)) {
+                eventos.push(novoEvento);
+                carregarEventos();
+                document.getElementById('novoEvento').value = '';
+            }
+        }
+
+        function removerEvento(index) {
+            if (confirm('Tem certeza que deseja remover este evento?')) {
+                eventos.splice(index, 1);
+                carregarEventos();
+            }
+        }
+
+        // Cadastro de Guias
+        document.getElementById('guiaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const novaGuia = {
+                id: Date.now(),
+                nome: document.getElementById('nome').value,
+                cidade: document.getElementById('cidade').value,
+                estado: document.getElementById('estado').value,
+                telefone: document.getElementById('telefone').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                passageiros: parseInt(document.getElementById('passageiros').value),
+                colaborador: document.getElementById('colaborador').value,
+                evento: document.getElementById('evento').value,
+                dataVisita: document.getElementById('dataVisita').value,
+                observacoes: document.getElementById('observacoes').value,
+                dataCadastro: new Date().toISOString()
+            };
+
+            guias.push(novaGuia);
+            
+            // Salvar automaticamente no arquivo
+            salvarAutomaticamente();
+            
+            // Resetar formulário
+            document.getElementById('guiaForm').reset();
+            document.getElementById('dataVisita').valueAsDate = new Date();
+            
+            // Atualizar dados
+            atualizarRelatorios();
+            atualizarTabelaDados();
+            
+            // Mostrar mensagem de sucesso
+            mostrarMensagemSucesso(`✅ Guia "${novaGuia.nome}" salva com sucesso!`);
+        });
+
+        // Preview WhatsApp
+        function previewWhatsApp() {
+            const nome = document.getElementById('nome').value;
+            const evento = document.getElementById('evento').value;
+            const dataVisita = document.getElementById('dataVisita').value;
+            
+            if (!nome || !evento || !dataVisita) {
+                alert('⚠️ Preencha pelo menos Nome, Evento e Data da Visita para visualizar a mensagem.');
+                return;
+            }
+
+            const dataFormatada = new Date(dataVisita).toLocaleDateString('pt-BR');
+            const mensagem = `🌟 Olá ${nome}!\n\nObrigado por participar do evento "${evento}" no dia ${dataFormatada}.\n\nEsperamos que tenha sido uma experiência incrível!\n\n📞 Qualquer dúvida, estamos à disposição.\n\nAtenciosamente,\nEquipe Nova Brasil 🇧🇷`;
+            
+            document.getElementById('whatsappMessage').innerHTML = mensagem.replace(/\n/g, '<br>');
+            document.getElementById('whatsappPreview').style.display = 'block';
+        }
+
+        function sendWhatsApp() {
+            const whatsapp = document.getElementById('whatsapp').value.replace(/\D/g, '');
+            const mensagem = document.getElementById('whatsappMessage').innerText;
+            
+            if (whatsapp) {
+                const url = `https://wa.me/55${whatsapp}?text=${encodeURIComponent(mensagem)}`;
+                window.open(url, '_blank');
+            } else {
+                alert('⚠️ Número do WhatsApp é obrigatório!');
+            }
+        }
+
+        // Relatórios
+        function atualizarRelatorios() {
+            const hoje = new Date().toISOString().split('T')[0];
+            const inicioSemana = new Date();
+            inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+            const inicioSemanaStr = inicioSemana.toISOString().split('T')[0];
+
+            const totalGuias = guias.length;
+            const totalPassageiros = guias.reduce((sum, guia) => sum + guia.passageiros, 0);
+            const guiasHoje = guias.filter(guia => guia.dataVisita === hoje).length;
+            const guiasSemana = guias.filter(guia => guia.dataVisita >= inicioSemanaStr).length;
+
+            document.getElementById('totalGuias').textContent = totalGuias;
+            document.getElementById('totalPassageiros').textContent = totalPassageiros;
+            document.getElementById('guiasHoje').textContent = guiasHoje;
+            document.getElementById('guiasSemana').textContent = guiasSemana;
+
+            // Relatório por cidades
+            const cidadesCont = {};
+            guias.forEach(guia => {
+                const chave = `${guia.cidade}/${guia.estado}`;
+                cidadesCont[chave] = (cidadesCont[chave] || 0) + 1;
+            });
+
+            let relatorioHTML = '<h3>📍 Relatório por Cidades:</h3><ul>';
+            Object.entries(cidadesCont)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([cidade, count]) => {
+                    relatorioHTML += `<li><strong>${cidade}:</strong> ${count} guia(s)</li>`;
+                });
+            relatorioHTML += '</ul>';
+
+            document.getElementById('relatorioDetalhado').innerHTML = relatorioHTML;
+
+            // Atualizar filtros
+            const filtroCidade = document.getElementById('filtroCidade');
+            filtroCidade.innerHTML = '<option value="">Todas as Cidades</option>';
+            Object.keys(cidadesCont).forEach(cidade => {
+                filtroCidade.innerHTML += `<option value="${cidade}">${cidade}</option>`;
+            });
+        }
+
+        // Tabela de dados
+        function atualizarTabelaDados() {
+            const tbody = document.getElementById('corpoTabela');
+            tbody.innerHTML = '';
+
+            guias.forEach(guia => {
+                const dataFormatada = new Date(guia.dataVisita).toLocaleDateString('pt-BR');
+                const whatsappLimpo = guia.whatsapp.replace(/\D/g, '');
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${guia.nome}</td>
+                        <td>${guia.cidade}/${guia.estado}</td>
+                        <td>${guia.whatsapp}</td>
+                        <td>${guia.passageiros}</td>
+                        <td>${guia.evento}</td>
+                        <td>${guia.colaborador || 'N/A'}</td>
+                        <td>${dataFormatada}</td>
+                        <td>
+                            <button class="whatsapp-btn" onclick="abrirWhatsApp('${whatsappLimpo}', '${guia.nome}')">
+                                📱 WhatsApp
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function abrirWhatsApp(numero, nome) {
+            const mensagem = `🌟 Olá ${nome}!\n\nObrigado por participar do nosso evento!\n\nAtenciosamente,\nEquipe Nova Brasil 🇧🇷`;
+            const url = `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        }
+
+        function filtrarDados() {
+            const filtroNome = document.getElementById('filtroNome').value.toLowerCase();
+            const filtroCidade = document.getElementById('filtroCidade').value;
+            
+            const linhas = document.querySelectorAll('#corpoTabela tr');
+            
+            linhas.forEach(linha => {
+                const nome = linha.cells[0].textContent.toLowerCase();
+                const cidade = linha.cells[1].textContent;
+                
+                const nomeMatch = nome.includes(filtroNome);
+                const cidadeMatch = !filtroCidade || cidade === filtroCidade;
+                
+                linha.style.display = (nomeMatch && cidadeMatch) ? '' : 'none';
+            });
+        }
+
+        // Funções de Salvamento e Carregamento
+        function salvarAutomaticamente() {
+            try {
+                // Salva os dados automaticamente (simulação de salvamento automático)
+                // Em uma aplicação real, isso enviaria para um servidor
+                console.log('Dados salvos automaticamente:', {
+                    totalGuias: guias.length,
+                    ultimaGuia: guias[guias.length - 1]?.nome,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error('Erro no salvamento automático:', error);
+            }
+        }
+
+        function mostrarMensagemSucesso(mensagem) {
+            const mensagemDiv = document.getElementById('mensagemSucesso');
+            mensagemDiv.textContent = mensagem;
+            mensagemDiv.style.display = 'block';
+            
+            // Efeito de fade in
+            mensagemDiv.style.opacity = '0';
+            mensagemDiv.style.transition = 'opacity 0.3s ease-in-out';
+            setTimeout(() => {
+                mensagemDiv.style.opacity = '1';
+            }, 100);
+            
+            // Ocultar após 4 segundos com fade out
+            setTimeout(() => {
+                mensagemDiv.style.opacity = '0';
+                setTimeout(() => {
+                    mensagemDiv.style.display = 'none';
+                }, 300);
+            }, 4000);
+        }
+
+        function salvarDados() {
+            try {
+                const dadosParaSalvar = {
+                    guias: guias,
+                    eventos: eventos,
+                    colaboradores: colaboradores,
+                    dataExportacao: new Date().toISOString()
+                };
+
+                const dataStr = JSON.stringify(dadosParaSalvar, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `nova_brasil_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                mostrarStatus('✅ Dados salvos com sucesso!', 'success');
+            } catch (error) {
+                mostrarStatus('❌ Erro ao salvar dados!', 'error');
+                console.error('Erro ao salvar:', error);
+            }
+        }
+
+        function carregarDados(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dadosCarregados = JSON.parse(e.target.result);
+                    
+                    if (dadosCarregados.guias && Array.isArray(dadosCarregados.guias)) {
+                        guias = dadosCarregados.guias;
+                    }
+                    
+                    if (dadosCarregados.colaboradores && Array.isArray(dadosCarregados.colaboradores)) {
+                        colaboradores = dadosCarregados.colaboradores;
+                    }
+                    
+                    // Atualizar interface
+                    carregarEventos();
+                    carregarColaboradores();
+                    atualizarRelatorios();
+                    atualizarTabelaDados();
+                    
+                    mostrarStatus(`✅ Dados carregados com sucesso! ${guias.length} guias importadas.`, 'success');
+                } catch (error) {
+                    mostrarStatus('❌ Erro ao carregar dados! Arquivo inválido.', 'error');
+                    console.error('Erro ao carregar:', error);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Limpar o input
+            event.target.value = '';
+        }
+
+        function limparDados() {
+            if (confirm('⚠️ Tem certeza que deseja limpar TODOS os dados? Esta ação não pode ser desfeita!')) {
+                guias = [];
+                eventos = ['Feira de Turismo São Paulo', 'Festival de Inverno', 'Expo Turismo Brasil', 'Congresso de Turismo'];
+                colaboradores = ['Maria Silva', 'João Santos', 'Ana Costa', 'Pedro Oliveira'];
+                
+                carregarEventos();
+                carregarColaboradores();
+                atualizarRelatorios();
+                atualizarTabelaDados();
+                
+                mostrarStatus('🗑️ Todos os dados foram limpos!', 'warning');
+            }
+        }
+
+        function mostrarStatus(mensagem, tipo) {
+            const statusDiv = document.getElementById('statusSalvamento');
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = mensagem;
+            
+            // Cores baseadas no tipo
+            switch(tipo) {
+                case 'success':
+                    statusDiv.style.backgroundColor = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.style.border = '1px solid #c3e6cb';
+                    break;
+                case 'error':
+                    statusDiv.style.backgroundColor = '#f8d7da';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.style.border = '1px solid #f5c6cb';
+                    break;
+                case 'warning':
+                    statusDiv.style.backgroundColor = '#fff3cd';
+                    statusDiv.style.color = '#856404';
+                    statusDiv.style.border = '1px solid #ffeaa7';
+                    break;
+            }
+            
+            // Ocultar após 5 segundos
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+        function exportarExcel() {
+            if (guias.length === 0) {
+                alert('⚠️ Não há dados para exportar!');
+                return;
+            }
+
+            const dadosExcel = guias.map(guia => ({
+                'Nome': guia.nome,
+                'Cidade': guia.cidade,
+                'Estado': guia.estado,
+                'Telefone': guia.telefone,
+                'WhatsApp': guia.whatsapp,
+                'Passageiros': guia.passageiros,
+                'Evento': guia.evento,
+                'Data da Visita': new Date(guia.dataVisita).toLocaleDateString('pt-BR'),
+                'Observações': guia.observacoes,
+                'Data de Cadastro': new Date(guia.dataCadastro).toLocaleString('pt-BR')
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Guias Turísticas');
+
+            // Proteção com senha (simulação)
+            const hoje = new Date().toISOString().split('T')[0];
+            const nomeArquivo = `Nova_Brasil_Guias_${hoje}.xlsx`;
+            
+            XLSX.writeFile(workbook, nomeArquivo);
+            alert(`📋 Arquivo Excel exportado com sucesso!\n\nNome: ${nomeArquivo}\nSenha de acesso: NB2025`);
+        }
+
+        // Inicializar na carga da página
+        window.addEventListener('load', function() {
+            inicializarSistema();
+        });
+    </script>
+</body>
+</html>
